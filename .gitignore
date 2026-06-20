@@ -1,0 +1,28 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# --- Rust (truco_fast) ---
+truco_fast/target/
+
+# --- Model & data artifacts ---------------------------------------------------
+# These are large and fully regenerable from the training pipeline. Only the
+# champion model and the (small) reproducible opponent pool are tracked.
+checkpoints/*
+!checkpoints/rl_legality.pt
+!checkpoints/opponent_pool.json
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Raw session transcripts (distilled into DEVELOPMENT_HISTORY.md) ---
+sessions/
+
+# --- OS / editor ---
+.DS_Store
+*.swp

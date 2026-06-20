@@ -1,0 +1,9 @@
+[project]
+name = "trucogpt"
+version = "0.1.0"
+description = "A transformer policy trained by self-play RL to play Brazilian Truco."
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.4.6",
+    "torch>=2.12.0",
+]

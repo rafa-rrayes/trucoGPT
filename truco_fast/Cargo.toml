@@ -1,0 +1,17 @@
+[package]
+name = "truco_fast"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "truco_fast"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.29.0", features = ["extension-module"] }
+rayon = "1"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
