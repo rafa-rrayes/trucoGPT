@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block body %}
+<header class="room-header">
+  <a class="room-brand" href="/">Truco<span class="brand-accent">GPT</span></a>
+  <div class="room-code-box">
+    <span class="room-code-label">Room</span>
+    <span class="room-code" id="room-code-value">{{ ctx.code }}</span>
+    <button type="button" class="btn btn-ghost btn-copy" onclick="copyRoomCode(this)">Copy</button>
+  </div>
+</header>
+
+<div id="room-root" class="room-root" hx-ext="ws" ws-connect="/ws/{{ ctx.code }}">
+  {% include "partials/_seats.html" %}
+  {% include "partials/_board.html" %}
+  {% include "partials/_hand.html" %}
+  {% include "partials/_actions.html" %}
+  {% include "partials/_log.html" %}
+  {% include "partials/_toast.html" %}
+</div>
+
+<script>
+  function copyRoomCode(btn) {
+    var code = document.getElementById('room-code-value').textContent.trim();
+    var done = function () {
+      var prev = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(function () { btn.textContent = prev; }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(done, done);
+    } else {
+      done();
+    }
+  }
+</script>
+{% endblock %}

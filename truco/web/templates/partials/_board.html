@@ -1,0 +1,103 @@
+<section id="board" class="board">
+  {% if ctx.game %}
+  {% set g = ctx.game %}
+  {% set sc = g.scores %}
+  <div class="scoreboard">
+    <div class="score-team score-us">
+      <span class="score-label">Us</span>
+      <span class="score-points">{{ sc.us }}</span>
+      <span class="score-sub">sets {{ sc.usSets }}</span>
+    </div>
+    <div class="score-mid">
+      <span class="score-to">to 12</span>
+      <span class="score-vs">vs</span>
+    </div>
+    <div class="score-team score-them">
+      <span class="score-label">Them</span>
+      <span class="score-points">{{ sc.them }}</span>
+      <span class="score-sub">sets {{ sc.themSets }}</span>
+    </div>
+  </div>
+
+  <div class="board-meta">
+    <div class="vira-box">
+      <span class="meta-label">Vira</span>
+      {% set v = g.vira %}
+      <span class="card-face card-sm {{ v.color }}">
+        <span class="card-rank">{{ v.rank }}</span>
+        <span class="card-suit">{{ v.symbol }}</span>
+      </span>
+      <span class="manilha-note">manilha: any <strong>{{ g.manilha }}</strong></span>
+    </div>
+
+    <div class="stake-box{% if g.stake.value > 1 %} stake-hot{% endif %}">
+      <span class="meta-label">Stake</span>
+      <span class="stake-value">{{ g.stake.value }}</span>
+      <span class="stake-name">{% if g.stake.name and g.stake.name != "none" %}{{ g.stake.name }}{% else %}&mdash;{% endif %}</span>
+    </div>
+
+    <div class="rounds-box">
+      <span class="meta-label">Rounds</span>
+      <div class="round-pips">
+        {% for i in range(3) %}
+        {% set r = g.roundResults[i] if i < (g.roundResults | length) else None %}
+        <span class="pip pip-{{ r if r else 'pending' }}{% if (i + 1) == g.round and r is none %} pip-active{% endif %}">
+          <span class="pip-n">R{{ i + 1 }}</span>
+          <span class="pip-r">{% if r == "us" %}Us{% elif r == "them" %}Them{% elif r == "tie" %}Tie{% else %}&middot;{% endif %}</span>
+        </span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="felt">
+    {% set ns = {} %}
+    {% for t in g.table %}
+      {% set _ = ns.update({(t.seat - ctx.you.seat + 4) % 4: t}) %}
+    {% endfor %}
+    {% set pos_names = {0: "bottom", 1: "right", 2: "top", 3: "left"} %}
+    {% set pos_labels = {0: "You", 1: "Right", 2: "Partner", 3: "Left"} %}
+    {% for p in [2, 3, 1, 0] %}
+    {% set t = ns.get(p) %}
+    <div class="felt-slot slot-{{ pos_names[p] }}">
+      {% if t %}
+        {% if t.hidden %}
+        <span class="card-face card-back" title="Hidden card"></span>
+        {% elif t.faceDown %}
+        <span class="card-face card-back card-facedown{% if t.isYou %} mine{% endif %}" title="Face-down{% if t.isYou %} (yours){% endif %}">&#9663;</span>
+        {% elif t.card %}
+        <span class="card-face {{ t.card.color }}{% if t.card.zap %} card-zap{% elif t.card.manilha %} card-manilha{% endif %}{% if t.isYou %} mine{% endif %}">
+          <span class="card-rank">{{ t.card.rank }}</span>
+          <span class="card-suit">{{ t.card.symbol }}</span>
+          {% if t.card.zap %}<span class="zap-mark">&#9889;</span>{% endif %}
+        </span>
+        {% else %}
+        <span class="card-slot-empty"></span>
+        {% endif %}
+      {% else %}
+      <span class="card-slot-empty"></span>
+      {% endif %}
+      <span class="slot-label">{{ pos_labels[p] }}</span>
+    </div>
+    {% endfor %}
+    <div class="felt-center">
+      {% if g.phase == "respond" and g.pending %}
+        <span class="felt-tag felt-tag-hot">{{ g.pending.name }} called!</span>
+      {% elif g.phase == "match_done" %}
+        <span class="felt-tag">Match over</span>
+      {% elif g.phase == "hand_done" %}
+        <span class="felt-tag">Hand over</span>
+      {% else %}
+        <span class="felt-tag felt-tag-quiet">Round {{ g.round }}</span>
+      {% endif %}
+    </div>
+  </div>
+
+  {% else %}
+  <div class="board-empty">
+    <div class="felt felt-idle">
+      <p class="waiting">Waiting for players&hellip;</p>
+    </div>
+  </div>
+  {% endif %}
+</section>

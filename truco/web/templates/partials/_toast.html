@@ -1,0 +1,8 @@
+{% if ctx.toast %}
+<div id="toast" class="toast toast-{{ ctx.toast.level }}" role="alert">
+  <span class="toast-text">{{ ctx.toast.text }}</span>
+  <button type="button" class="toast-close" aria-label="Dismiss" onclick="this.parentElement.remove()">&times;</button>
+</div>
+{% else %}
+<div id="toast" class="toast toast-empty" aria-hidden="true"></div>
+{% endif %}

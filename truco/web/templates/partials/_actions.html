@@ -1,0 +1,87 @@
+<section id="actions" class="actions">
+  {% if ctx.phase == "finished" %}
+  <div class="actions-finished">
+    <div class="result-line {% if ctx.winner == 'us' %}win-us{% elif ctx.winner == 'them' %}win-them{% endif %}">
+      {% if ctx.winnerName %}<strong>{{ ctx.winnerName }}</strong> won the match!{% else %}Match finished.{% endif %}
+    </div>
+    <button ws-send hx-vals='{"cmd":"new_match"}' class="btn btn-primary">Rematch</button>
+  </div>
+
+  {% elif ctx.game %}
+  {% set g = ctx.game %}
+  {% set acts = g.legalActions %}
+  {% set signals = acts | selectattr("kind", "equalto", "signal") | list %}
+  {% set trucos = acts | selectattr("kind", "equalto", "truco") | list %}
+  {% set accepts = acts | selectattr("kind", "equalto", "accept") | list %}
+  {% set runs = acts | selectattr("kind", "equalto", "run") | list %}
+  {% set reraises = acts | selectattr("kind", "equalto", "reraise") | list %}
+  {% set elevens = acts | selectattr("kind", "equalto", "eleven") | list %}
+
+  {% if g.pending and g.pending.youRespond %}
+  <div class="respond-bar">
+    <div class="respond-call">
+      <span class="respond-emoji">&#128293;</span>
+      <span><strong>{{ "Them" if g.pending.callerTeam == "them" else "Us" }}</strong>
+      called <strong>{{ g.pending.name }}</strong> &mdash; stake now <strong>{{ g.pending.value }}</strong>.</span>
+    </div>
+    <div class="respond-choices">
+      {% for a in accepts %}
+      <button ws-send hx-vals='{"cmd":"action","index":{{ a.index }}}' class="btn btn-accept">Accept ({{ g.pending.value }})</button>
+      {% endfor %}
+      {% for a in reraises %}
+      <button ws-send hx-vals='{"cmd":"action","index":{{ a.index }}}' class="btn btn-raise">Re-raise</button>
+      {% endfor %}
+      {% for a in runs %}
+      <button ws-send hx-vals='{"cmd":"action","index":{{ a.index }}}' class="btn btn-run">Run (fold)</button>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% elif g.yourTurn %}
+  <div class="turn-bar">
+    <span class="turn-prompt">Your turn</span>
+    <div class="turn-actions">
+      {% for a in elevens %}
+      <button ws-send hx-vals='{"cmd":"action","index":{{ a.index }}}' class="btn {{ 'btn-primary' if a.play else 'btn-ghost' }}">{{ "Play hand" if a.play else "Skip (+1)" }}</button>
+      {% endfor %}
+      {% for a in trucos %}
+      <button ws-send hx-vals='{"cmd":"action","index":{{ a.index }}}' class="btn btn-raise">Truco / Raise</button>
+      {% endfor %}
+      {% for a in accepts %}
+      <button ws-send hx-vals='{"cmd":"action","index":{{ a.index }}}' class="btn btn-accept">Accept</button>
+      {% endfor %}
+      {% for a in reraises %}
+      <button ws-send hx-vals='{"cmd":"action","index":{{ a.index }}}' class="btn btn-raise">Re-raise</button>
+      {% endfor %}
+      {% for a in runs %}
+      <button ws-send hx-vals='{"cmd":"action","index":{{ a.index }}}' class="btn btn-run">Run (fold)</button>
+      {% endfor %}
+    </div>
+    {% if signals %}
+    <details class="signal-group">
+      <summary class="btn btn-ghost btn-sm">Signal partner &#9662;</summary>
+      <div class="signal-list">
+        {% for a in signals %}
+        <button ws-send hx-vals='{"cmd":"action","index":{{ a.index }}}' class="btn btn-sm btn-ghost">{{ a.label }}</button>
+        {% endfor %}
+      </div>
+    </details>
+    {% endif %}
+  </div>
+
+  {% else %}
+  <div class="wait-bar">
+    {% set cur = None %}
+    {% for s in ctx.seats if s.seat == g.currentActor %}{% set cur = s %}{% endfor %}
+    {% if cur %}
+    <span class="wait-text">Waiting for <strong>{{ cur.name }}</strong>&hellip;</span>
+    {% else %}
+    <span class="wait-text wait-quiet">Waiting&hellip;</span>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="actions-idle"></div>
+  {% endif %}
+</section>

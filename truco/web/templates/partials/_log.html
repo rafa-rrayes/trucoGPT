@@ -1,0 +1,18 @@
+<section id="log" class="log">
+  <h3 class="log-title">Game log</h3>
+  <div class="log-feed" id="log-feed">
+    {% if ctx.log %}
+      {% for line in ctx.log %}
+      <div class="log-line">{{ line }}</div>
+      {% endfor %}
+    {% else %}
+      <div class="log-line log-empty">No events yet.</div>
+    {% endif %}
+  </div>
+  <script>
+    (function () {
+      var f = document.getElementById('log-feed');
+      if (f) { f.scrollTop = f.scrollHeight; }
+    })();
+  </script>
+</section>

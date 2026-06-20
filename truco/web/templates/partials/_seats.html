@@ -1,0 +1,73 @@
+<section id="seats" class="seats phase-{{ ctx.phase }}">
+  {% if ctx.phase == "lobby" %}
+  <div class="seats-lobby">
+    <div class="seats-roominfo">
+      <span class="roominfo-code">Room <strong>{{ ctx.code }}</strong></span>
+      <span class="roominfo-filled">{{ ctx.seatsFilled }}/4 seated</span>
+    </div>
+
+    <div class="teams">
+      {% for tname, tlabel in [("us", "Us"), ("them", "Them")] %}
+      <div class="team team-{{ tname }}">
+        <h3 class="team-title">{{ tlabel }}</h3>
+        {% for s in ctx.seats if s.teamName == tname %}
+        <div class="seat-card occ-{{ s.occupant }}{% if s.isYou %} is-you{% endif %}">
+          <div class="seat-line">
+            <span class="seat-no">Seat {{ s.seat }}</span>
+            {% if s.isDealer %}<span class="chip chip-dealer" title="Dealer">D</span>{% endif %}
+            {% if s.occupant == "model" %}<span class="chip chip-ai">TrucoGPT</span>{% endif %}
+            {% if s.occupant == "heuristic" %}<span class="chip chip-bot">Bot</span>{% endif %}
+            {% if s.occupant != "empty" and not s.connected %}<span class="chip chip-off" title="Disconnected">offline</span>{% endif %}
+          </div>
+          <div class="seat-name">
+            {% if s.occupant == "empty" %}<span class="seat-empty">Empty</span>{% else %}{{ s.name }}{% endif %}
+            {% if s.isHost %}<span class="chip chip-host" title="Host">host</span>{% endif %}
+            {% if s.isYou %}<span class="chip chip-you">you</span>{% endif %}
+          </div>
+
+          {% if s.occupant == "empty" %}
+          <div class="seat-actions">
+            <button ws-send hx-vals='{"cmd":"sit","seat":{{ s.seat }}}' class="btn btn-sm btn-primary">Sit</button>
+            <button ws-send hx-vals='{"cmd":"add_ai","seat":{{ s.seat }},"kind":"model"}' class="btn btn-sm btn-ghost">+ TrucoGPT</button>
+            <button ws-send hx-vals='{"cmd":"add_ai","seat":{{ s.seat }},"kind":"heuristic"}' class="btn btn-sm btn-ghost">+ Bot</button>
+          </div>
+          {% elif s.occupant in ["model", "heuristic"] and ctx.you.isHost %}
+          <div class="seat-actions">
+            <button ws-send hx-vals='{"cmd":"remove_ai","seat":{{ s.seat }}}' class="btn btn-sm btn-danger">Remove</button>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="lobby-controls">
+      {% if ctx.you.isSeated %}
+      <button ws-send hx-vals='{"cmd":"stand"}' class="btn btn-ghost">Stand up</button>
+      {% endif %}
+      {% if ctx.canStart and ctx.you.isHost %}
+      <button ws-send hx-vals='{"cmd":"start"}' class="btn btn-primary btn-start">Start match</button>
+      {% elif not ctx.canStart %}
+      <span class="lobby-hint">Fill all 4 seats to start.</span>
+      {% endif %}
+    </div>
+  </div>
+
+  {% else %}
+  <div class="seats-play">
+    {% for s in ctx.seats %}
+    <div class="nameplate team-{{ s.teamName }} occ-{{ s.occupant }}{% if s.isCurrent %} is-current{% endif %}{% if s.isYou %} is-you{% endif %}{% if not s.connected %} is-off{% endif %}">
+      <span class="np-name">{{ s.name }}</span>
+      <span class="np-tags">
+        {% if s.isDealer %}<span class="chip chip-dealer" title="Dealer">D</span>{% endif %}
+        {% if s.occupant == "model" %}<span class="chip chip-ai">AI</span>{% endif %}
+        {% if s.occupant == "heuristic" %}<span class="chip chip-bot">Bot</span>{% endif %}
+        {% if not s.connected %}<span class="chip chip-off" title="Disconnected">off</span>{% endif %}
+      </span>
+      <span class="np-team">{{ "Us" if s.teamName == "us" else "Them" }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>

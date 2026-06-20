@@ -1,0 +1,40 @@
+<section id="hand" class="hand">
+  {% if ctx.game and (ctx.game.hand | length) > 0 %}
+  {% set g = ctx.game %}
+  <h3 class="hand-title">Your hand</h3>
+  <div class="hand-cards">
+    {% for c in g.hand %}
+    <div class="hand-card-wrap">
+      {% if c.playable and c.playIndex is not none %}
+      <button ws-send hx-vals='{"cmd":"action","index":{{ c.playIndex }}}'
+              class="card-face card-lg playable {{ c.color }}{% if c.zap %} card-zap{% elif c.manilha %} card-manilha{% endif %}"
+              title="Play {{ c.str }}">
+        <span class="card-rank">{{ c.rank }}</span>
+        <span class="card-suit">{{ c.symbol }}</span>
+        {% if c.zap %}<span class="zap-mark">&#9889;</span>{% elif c.manilha %}<span class="manilha-mark">&#9733;</span>{% endif %}
+      </button>
+      {% else %}
+      <span class="card-face card-lg disabled {{ c.color }}{% if c.zap %} card-zap{% elif c.manilha %} card-manilha{% endif %}"
+            title="{{ c.str }}">
+        <span class="card-rank">{{ c.rank }}</span>
+        <span class="card-suit">{{ c.symbol }}</span>
+        {% if c.zap %}<span class="zap-mark">&#9889;</span>{% elif c.manilha %}<span class="manilha-mark">&#9733;</span>{% endif %}
+      </span>
+      {% endif %}
+      {% if c.faceDownIndex is not none %}
+      <button ws-send hx-vals='{"cmd":"action","index":{{ c.faceDownIndex }}}'
+              class="btn btn-xs btn-ghost facedown-btn" title="Play this card face-down">&#9663; face-down</button>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="hand-empty">
+    {% if ctx.you.isSpectator %}
+    <p class="hand-note">Spectating &mdash; no cards.</p>
+    {% else %}
+    <p class="hand-note">No cards in hand.</p>
+    {% endif %}
+  </div>
+  {% endif %}
+</section>

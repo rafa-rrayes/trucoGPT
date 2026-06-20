@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block body %}
+<main class="landing">
+  <section class="hero">
+    <div class="hero-cards" aria-hidden="true">
+      <span class="mini-card red">A<span class="suit">&#9830;</span></span>
+      <span class="mini-card black">2<span class="suit">&#9827;</span></span>
+      <span class="mini-card red">3<span class="suit">&#9829;</span></span>
+      <span class="mini-card black">K<span class="suit">&#9824;</span></span>
+    </div>
+    <h1 class="brand">Truco<span class="brand-accent">GPT</span></h1>
+    <p class="tagline">Brazilian Truco, online &mdash; play your friends or the AI champion.</p>
+
+    {% if ctx.toast %}
+    <div class="banner banner-{{ ctx.toast.level }}" role="alert">{{ ctx.toast.text }}</div>
+    {% endif %}
+
+    <div class="landing-forms">
+      <form class="card-form" method="post" action="/create">
+        <h2>Create a room</h2>
+        <input type="text" name="name" placeholder="Your name" autocomplete="nickname" required>
+        <button type="submit" class="btn btn-primary">Create room</button>
+      </form>
+
+      <div class="form-divider"><span>or</span></div>
+
+      <form class="card-form" method="post" action="/join">
+        <h2>Join a room</h2>
+        <input type="text" name="name" placeholder="Your name" autocomplete="nickname" required>
+        <input type="text" name="code" placeholder="Room code" autocomplete="off" maxlength="8" required>
+        <button type="submit" class="btn btn-secondary">Join</button>
+      </form>
+    </div>
+  </section>
+</main>
+{% endblock %}
