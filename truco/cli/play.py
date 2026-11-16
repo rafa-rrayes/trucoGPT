@@ -57,12 +57,26 @@ def build_agents(rng: random.Random, policy_path: str | None = None, temperature
 
 def play_match(state, agents, rng, out=print) -> int:
     """Run a match to completion, rendering for the human. Returns the winning team."""
+    # Transformer bots read token streams, so tokenize the match only when one is seated.
+    tok = None
+    if any(getattr(a, "needs_stream", False) for a in agents.values()):
+        from ..rl.tokenizer import MatchTokenizer  # lazy: keeps the base CLI torch-free
+
+        tok = MatchTokenizer()
+        tok.start(state)
     while not state.done:
         actor = state.current_actor
         if actor == HUMAN_SEAT:
             out(render_board(observe(state, HUMAN_SEAT)))
-        action = agents[actor].act(observe(state, actor))
+        if tok is not None:
+            tok.begin_turn(actor)
+        agent = agents[actor]
+        obs = observe(state, actor)
+        action = agent.act(obs, tok.streams[actor]) if getattr(agent, "needs_stream", False) \
+            else agent.act(obs)
         state, events = engine.apply_action(state, action, rng)
+        if tok is not None:
+            tok.ingest(state, events)
         for line in narrate(events, HUMAN_SEAT):
             out(line)
     return state.winner
