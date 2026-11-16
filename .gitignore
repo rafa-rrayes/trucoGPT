@@ -20,9 +20,10 @@ checkpoints/*
 *.log
 logs/
 
-# --- Raw session transcripts (distilled into DEVELOPMENT_HISTORY.md) ---
-sessions/
-
 # --- OS / editor ---
 .DS_Store
 *.swp
+.idea/
+.vscode/
+.env
+

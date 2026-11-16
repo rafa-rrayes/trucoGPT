@@ -42,7 +42,9 @@ def _rust_backend():
         import truco_fast
     except ImportError:
         return None
-    return truco_fast
+    # The repo's `truco_fast/` crate directory is importable as an empty namespace package
+    # when the extension isn't built, so check for a real symbol.
+    return truco_fast if hasattr(truco_fast, "run_tournament") else None
 
 
 @dataclass

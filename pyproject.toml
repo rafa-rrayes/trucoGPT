@@ -1,9 +1,24 @@
 [project]
 name = "trucogpt"
 version = "0.1.0"
-description = "A transformer policy trained by self-play RL to play Brazilian Truco."
+description = "A small GPT-style transformer that plays Brazilian Truco, trained by imitation, RL and self-play."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
     "numpy>=2.4.6",
     "torch>=2.12.0",
+]
+
+[project.optional-dependencies]
+web = [
+    "fastapi>=0.163.1",
+    "jinja2>=3.1.6",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
 ]
