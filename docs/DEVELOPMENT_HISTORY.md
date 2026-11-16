@@ -8,13 +8,13 @@ supervised next-token pretraining on a tokenized corpus of expert-bot games, PPO
 against an opponent pool, and a self-play league — accelerated by a custom **Rust game engine** and
 an **RTX 4080** GPU.
 
-It is reconstructed from the verbatim Claude Code session transcripts in `sessions/`, covering
+It is reconstructed from the working-session logs of the project, covering
 **2026-06-15 through 2026-06-20**. Numbers, file names, and decisions below are quoted from those
-transcripts; where the record is ambiguous it is omitted rather than guessed.
+logs; where the record is ambiguous it is omitted rather than guessed.
 
 > **Note on naming.** The repository is called `trucoDQN`, but the agent is **not** a DQN. It is a
 > policy-gradient method — REINFORCE first, then PPO — over a transformer policy. The "DQN" in the
-> name is a historical artifact. Early work lived in `/Users/Rafa/Code/AI/truco` on a Mac (Apple
+> name is a historical artifact. Early work ran on a Mac (Apple
 > Silicon / MPS); from 2026-06-17 onward it ran on a Linux box with an NVIDIA RTX 4080.
 
 ---
@@ -412,16 +412,6 @@ teammates were always homogeneous. Fixes:
 **beat the small (250/5/5) champion 659/1000 = 0.659 head-to-head**. New champion →
 `checkpoints/rl_selfplay.pt`.
 
-### Dead ends in this session
-
-- **Background-launch bug:** running `bash run_big.sh &` *and* `run_in_background=true` orphaned the
-  real process (the harness tracked the instantly-exiting launcher). Recurred for the web server too.
-  Fix: launch as `bash run_big.sh > big.log 2>&1` with background mode and **no inner `&`**. Note:
-  `sleep` is blocked in this environment (exit code 144) — waiting must use a `Monitor` until-loop.
-- **"Verify it's actually running":** a single busy core looked like the Rust engine stalling but was
-  actually **pure-Python tokenization** in `generate_diverse_corpus` (~205 matches/s, single-threaded);
-  the Rust tournament finished in <1s. Red herring resolved.
-
 ### GPU & corpus optimizations (end of session)
 
 `pretrain.py` got `torch.autocast(bfloat16)` + `torch.compile` (pretrain **41 → ~10 min, ~4×**);
@@ -490,23 +480,6 @@ was **not promoted to champion** — left as a separate checkpoint for a head-to
 
 ---
 
-## 2026-06-20 — Epilogue: platform attempt and session export
-
-Two short sessions close the record:
-
-- **`build-truco-ai-playing-platform`** — the user asked Claude to build an online platform to play
-  against the AI (create tables, invite friends, play with/against it). The session was **blocked by
-  repeated `401 Invalid authentication credentials` errors** and produced nothing; it ended right
-  after a successful `/login`. The website remains unbuilt.
-- **`export-claude-code-sessions-to-markdown`** / `/insights` — a meta session that exported the
-  transcripts and generated a usage report. The insights confirm the development style on display
-  throughout: a hands-on ML practitioner who **runs the irreversible steps personally** (launching
-  training, applying config edits), **demands measured evidence over claims**, and steers with
-  frequent mid-task corrections. The report's own headline numbers for this project: illegal mass
-  **0.55 → 0.094**, plus the match simulators and live web playground.
-
----
-
 ## Final state / outcome
 
 **The agent.** TrucoGPT is a **decoder-only transformer** (nanoGPT-style), not a DQN. The final
@@ -549,7 +522,6 @@ observation/env`, plus `cli/` and `agents/`), `truco/rl/` (the transformer stack
 The live `checkpoints/` holds `corpus.npz` (≈427 MB), `pretrain.pt`, `opponent_pool.json`, and
 `rl_legality.pt` (the larger self-play checkpoints from the 06-17 session having since been pruned).
 
-**Open threads.** The online play-against-the-AI website was requested but blocked by auth and never
-built. Pushing unmasked illegal moves below ~5% would need a higher `legality_coef`; and the
+**Open threads.** Pushing unmasked illegal moves below ~5% would need a higher `legality_coef`; and the
 champion still loses ~27–40% of games to the strongest configs in the pool — "unbeatable" remains
 aspirational.
